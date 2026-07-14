@@ -1,6 +1,51 @@
+import { spawn } from "child_process";
+import path from "path";
 import React from "react";
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import type { NoteSection } from "@/lib/anthropic";
+
+// Farsi/Arabic script range - if the generated text contains it, render via
+// the isolated RTL worker (see scripts/render-rtl-pdf.cjs) instead of the
+// Helvetica/LTR path below.
+const RTL_SCRIPT = /[؀-ۿ]/;
+
+function isRtl(title: string, sections: NoteSection[]): boolean {
+  const sample = [
+    title,
+    ...sections.flatMap((s) => [
+      s.heading,
+      ...s.bullets,
+      ...(s.questions?.flatMap((q) => [q.question, q.answer, ...(q.options ?? [])]) ?? []),
+    ]),
+  ].join(" ");
+  return RTL_SCRIPT.test(sample);
+}
+
+function renderRtlPdf(
+  title: string,
+  videoUrl: string,
+  sections: NoteSection[],
+): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [
+      path.join(process.cwd(), "scripts/render-rtl-pdf.cjs"),
+    ]);
+    const chunks: Buffer[] = [];
+    const errChunks: Buffer[] = [];
+    child.stdout.on("data", (c) => chunks.push(c));
+    child.stderr.on("data", (c) => errChunks.push(c));
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code !== 0) {
+        reject(new Error(Buffer.concat(errChunks).toString() || `render-rtl-pdf exited ${code}`));
+        return;
+      }
+      resolve(Buffer.from(Buffer.concat(chunks).toString(), "base64"));
+    });
+    child.stdin.write(JSON.stringify({ title, videoUrl, sections }));
+    child.stdin.end();
+  });
+}
 
 const styles = StyleSheet.create({
   page: { padding: 48, fontSize: 11, fontFamily: "Helvetica" },
@@ -131,6 +176,9 @@ export async function renderNotesPdf(
   videoUrl: string,
   sections: NoteSection[],
 ): Promise<Buffer> {
+  if (isRtl(title, sections)) {
+    return renderRtlPdf(title, videoUrl, sections);
+  }
   return renderToBuffer(
     <NotesDocument title={title} videoUrl={videoUrl} sections={sections} />,
   );

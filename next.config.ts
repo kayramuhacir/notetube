@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  outputFileTracingIncludes: {
+    "/api/generate": ["./scripts/render-rtl-pdf.cjs", "./src/fonts/**/*"],
+  },
 };
 
 export default nextConfig;

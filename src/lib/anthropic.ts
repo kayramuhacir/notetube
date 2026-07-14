@@ -94,7 +94,7 @@ export async function generateNotes(
     model: "claude-sonnet-5",
     max_tokens: mode === "study" ? 8192 : 4096,
     system:
-      "You turn YouTube video transcripts into clean, structured study notes. Respond with ONLY valid JSON, no markdown fences, no commentary.",
+      "You turn YouTube video transcripts into clean, structured study notes. Write the notes in the same language as the transcript (e.g. a Farsi transcript gets Farsi notes) - do not translate to English unless the transcript itself is in English. Respond with ONLY valid JSON, no markdown fences, no commentary.",
     messages: [
       {
         role: "user",
