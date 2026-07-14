@@ -34,7 +34,8 @@ export async function POST(request: Request) {
   }
 
   const { url, mode } = body;
-  if (!url || (mode !== "steps" && mode !== "summary")) {
+  const validModes = ["steps", "summary", "study", "transcript"];
+  if (!url || !mode || !validModes.includes(mode)) {
     return NextResponse.json(
       { error: "Please provide a YouTube link and a note style." },
       { status: 400 },
@@ -99,9 +100,14 @@ export async function POST(request: Request) {
   let sections;
   try {
     sections = await generateNotes(title, segments, mode as NoteMode);
-  } catch {
+  } catch (err) {
     return NextResponse.json(
-      { error: "Couldn't generate notes for this video. Please try again." },
+      {
+        error:
+          err instanceof Error
+            ? err.message
+            : "Couldn't generate notes for this video. Please try again.",
+      },
       { status: 500 },
     );
   }

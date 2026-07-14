@@ -10,7 +10,8 @@ interface Props {
 
 export default function NoteForm({ canGenerate }: Props) {
   const [url, setUrl] = useState("");
-  const [mode, setMode] = useState<"steps" | "summary">("steps");
+  const [mode, setMode] =
+    useState<"steps" | "summary" | "study" | "transcript">("steps");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [upgradeNeeded, setUpgradeNeeded] = useState(false);
@@ -70,16 +71,35 @@ export default function NoteForm({ canGenerate }: Props) {
         <span className="mb-1.5 block text-sm font-medium text-neutral-300">
           Note style
         </span>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {(
             [
-              { value: "steps", label: "Step-by-step" },
-              { value: "summary", label: "Summary" },
+              {
+                value: "steps",
+                label: "Step-by-step",
+                hint: "Numbered steps with timestamps — for tutorials",
+              },
+              {
+                value: "summary",
+                label: "Summary",
+                hint: "Grouped by topic, no timestamps",
+              },
+              {
+                value: "study",
+                label: "Study Mode",
+                hint: "Notes plus practice questions per section",
+              },
+              {
+                value: "transcript",
+                label: "Raw Transcript",
+                hint: "Just the captions, no AI processing",
+              },
             ] as const
           ).map((opt) => (
             <button
               key={opt.value}
               type="button"
+              title={opt.hint}
               onClick={() => setMode(opt.value)}
               className={`rounded-md px-3 py-1.5 text-sm font-medium border ${
                 mode === opt.value
@@ -91,6 +111,16 @@ export default function NoteForm({ canGenerate }: Props) {
             </button>
           ))}
         </div>
+        <p className="mt-1.5 text-xs text-neutral-500">
+          {
+            {
+              steps: "Numbered steps with timestamps — for tutorials.",
+              summary: "Grouped by topic, no timestamps.",
+              study: "Notes plus practice questions per section, with an answer key.",
+              transcript: "Just the captions, no AI processing.",
+            }[mode]
+          }
+        </p>
       </div>
 
       {error && (

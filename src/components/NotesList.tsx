@@ -6,9 +6,16 @@ export interface NoteRow {
   id: string;
   video_title: string;
   video_url: string;
-  mode: "steps" | "summary";
+  mode: "steps" | "summary" | "study" | "transcript";
   created_at: string;
 }
+
+const MODE_LABELS: Record<NoteRow["mode"], string> = {
+  steps: "Step-by-step",
+  summary: "Summary",
+  study: "Study Mode",
+  transcript: "Raw Transcript",
+};
 
 export default function NotesList({ notes }: { notes: NoteRow[] }) {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
@@ -46,7 +53,7 @@ export default function NotesList({ notes }: { notes: NoteRow[] }) {
               {note.video_title}
             </p>
             <p className="text-xs text-neutral-500">
-              {note.mode === "steps" ? "Step-by-step" : "Summary"} ·{" "}
+              {MODE_LABELS[note.mode]} ·{" "}
               {new Date(note.created_at).toLocaleDateString()}
             </p>
           </div>

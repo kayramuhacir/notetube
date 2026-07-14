@@ -52,7 +52,7 @@ create table if not exists public.notes (
   user_id uuid not null references public.users(id) on delete cascade,
   video_title text not null,
   video_url text not null,
-  mode text not null check (mode in ('steps', 'summary')),
+  mode text not null check (mode in ('steps', 'summary', 'study', 'transcript')),
   pdf_path text not null,
   created_at timestamptz not null default now()
 );

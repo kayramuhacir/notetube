@@ -43,7 +43,15 @@ export async function fetchTranscript(
   videoId: string,
 ): Promise<TranscriptSegment[]> {
   try {
-    const raw = await YoutubeTranscript.fetchTranscript(videoId);
+    let raw;
+    try {
+      // Prefer the original English track over auto-translated ones -
+      // without this, the library can return e.g. an Arabic auto-translation
+      // for an English video, which breaks non-AI modes that render it as-is.
+      raw = await YoutubeTranscript.fetchTranscript(videoId, { lang: "en" });
+    } catch {
+      raw = await YoutubeTranscript.fetchTranscript(videoId);
+    }
     if (!raw || raw.length === 0) {
       throw new YoutubeError("This video doesn't have any captions available.");
     }
