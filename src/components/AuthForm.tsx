@@ -41,17 +41,6 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
     router.refresh();
   }
 
-  async function handleGoogle() {
-    setError(null);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    if (error) setError(error.message);
-  }
-
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-6 px-6 py-24">
       <h1 className="text-2xl font-semibold text-white">
@@ -59,10 +48,12 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
       </h1>
 
       <button
-        onClick={handleGoogle}
-        className="rounded-md border border-neutral-700 py-2.5 font-medium text-neutral-200 hover:border-neutral-500"
+        type="button"
+        disabled
+        title="Google sign-in is coming soon"
+        className="cursor-not-allowed rounded-md border border-neutral-800 py-2.5 font-medium text-neutral-500"
       >
-        Continue with Google
+        Continue with Google (coming soon)
       </button>
 
       <div className="flex items-center gap-3 text-xs text-neutral-500">
