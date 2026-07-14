@@ -1,0 +1,11 @@
+import { createClient } from "@supabase/supabase-js";
+
+// Service-role client for trusted server-side operations only (API routes).
+// Bypasses Row Level Security - never import this into client components.
+export function createAdminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } },
+  );
+}
