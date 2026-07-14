@@ -9,6 +9,7 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -16,9 +17,10 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setInfo(null);
     setLoading(true);
 
-    const { error } =
+    const { data, error } =
       mode === "signup"
         ? await supabase.auth.signUp({ email, password })
         : await supabase.auth.signInWithPassword({ email, password });
@@ -27,6 +29,11 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
     if (error) {
       setError(error.message);
+      return;
+    }
+
+    if (mode === "signup" && !data.session) {
+      setInfo("Check your email to confirm your account, then log in.");
       return;
     }
 
@@ -83,6 +90,7 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
           className="rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2.5 text-white placeholder-neutral-500 outline-none focus:border-indigo-400"
         />
         {error && <p className="text-sm text-red-400">{error}</p>}
+        {info && <p className="text-sm text-emerald-400">{info}</p>}
         <button
           type="submit"
           disabled={loading}
